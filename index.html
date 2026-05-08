@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radar Dragon Quest</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; text-align: center; background: #1a1a1a; color: white; }
+        #radar { width: 200px; height: 200px; border-radius: 50%; border: 5px solid #f39c12; margin: 50px auto; background: radial-gradient(circle, #2ecc71 10%, #27ae60 90%); transition: 0.5s; }
+        .mensaje { font-size: 1.2rem; padding: 20px; }
+        button { padding: 15px 30px; font-size: 1rem; cursor: pointer; background: #e67e22; border: none; color: white; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <h1>RADAR DRAGON</h1>
+    <div id="radar"></div>
+    <div class="mensaje" id="status">Pulsa el botón para activar el radar</div>
+    <button onclick="iniciarRadar()">ACTIVAR RADAR</button>
+
+    <script>
+        // COORDENADAS DEL TESORO (Pon aquí las coordenadas de tu jardín o parque)
+        const tesoroLat = 39.4699; // Ejemplo: Valencia
+        const tesoroLon = -0.3763;
+        const radioExito = 10; // Metros de distancia para "ganar"
+
+        function iniciarRadar() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(verificarUbicacion, ErrorPosicion);
+            } else {
+                alert("Tu móvil no soporta GPS");
+            }
+        }
+
+        function verificarUbicacion(pos) {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            const distancia = calcularDistancia(lat, lon, tesoroLat, tesoroLon);
+
+            const radar = document.getElementById('radar');
+            const status = document.getElementById('status');
+
+            if (distancia < radioExito) {
+                radar.style.background = "gold";
+                status.innerHTML = "¡ESTÁ AQUÍ! ¡HAS ENCONTRADO LA BOLA DE DRAGÓN!";
+            } else if (distancia < 50) {
+                radar.style.background = "orange";
+                status.innerHTML = "¡CUIDADO! Una energía muy fuerte emana de cerca...";
+            } else {
+                radar.style.background = "green";
+                status.innerHTML = "Sigue buscando... la señal es débil.";
+            }
+        }
+
+        // Fórmula matemática para calcular distancia entre dos coordenadas GPS
+        function calcularDistancia(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Radio de la Tierra en metros
+            const phi1 = lat1 * Math.PI/180;
+            const phi2 = lat2 * Math.PI/180;
+            const dPhi = (lat2-lat1) * Math.PI/180;
+            const dLambda = (lon2-lon1) * Math.PI/180;
+            const a = Math.sin(dPhi/2) * Math.sin(dPhi/2) +
+                      Math.cos(phi1) * Math.cos(phi2) *
+                      Math.sin(dLambda/2) * Math.sin(dLambda/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function ErrorPosicion() { alert("No se puede acceder al GPS. Activa la ubicación."); }
+    </script>
+</body>
+</html>
